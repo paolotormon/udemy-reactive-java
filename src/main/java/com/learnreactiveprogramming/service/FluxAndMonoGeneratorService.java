@@ -16,7 +16,7 @@ public class FluxAndMonoGeneratorService {
     }
 
     public Flux<String> namesFlux() {
-        return Flux.fromIterable(List.of("alex", "ben", "chloe")); //db or a
+        return Flux.fromIterable(List.of("alex", "ben", "chloe")).log(); //db or a
         // remote service call
     }
 
