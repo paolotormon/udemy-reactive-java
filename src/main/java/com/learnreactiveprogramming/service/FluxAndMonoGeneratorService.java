@@ -62,10 +62,17 @@ public class FluxAndMonoGeneratorService {
     Flux<String> namesFlux_flatMapAsync(int stringLength) {
         return Flux.fromIterable(nameList)
                 .map(String::toUpperCase)
-                .filter(s -> s.length() > stringLength)
+                .filter(name -> name.length() > stringLength)
                 .flatMap(StringHelper::splitStringWithDelay)
                 .log();
     }
 
+    Flux<String> namesFlux_concatMap(int stringLength) {
+        return Flux.fromIterable(nameList)
+                .map(String::toUpperCase)
+                .filter(name -> name.length() > stringLength)
+                .concatMap(name -> StringHelper.splitStringWithDelay(name, 1000))
+                .log();
+    }
 
 }

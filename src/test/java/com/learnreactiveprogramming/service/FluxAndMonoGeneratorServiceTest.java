@@ -54,4 +54,11 @@ public class FluxAndMonoGeneratorServiceTest {
                 .verifyComplete();
     }
 
+    @Test
+    void namesFlux_concatMap_async() {
+        StepVerifier.create(fluxAndMonoGeneratorService.namesFlux_concatMap(3))
+                .expectNext("A", "L", "E", "X", "C", "H", "L", "O", "E")
+                .verifyComplete();
+    }
+
 }
