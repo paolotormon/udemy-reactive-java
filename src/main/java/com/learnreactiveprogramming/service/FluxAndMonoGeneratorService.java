@@ -23,6 +23,10 @@ public class FluxAndMonoGeneratorService {
                 .subscribe(System.out::println);
     }
 
+    public Mono<String> nameMono() {
+        return Mono.just("adam");
+    }
+
     public Flux<String> namesFlux() {
         //namelist is a publisher. a publisher is a source of data like db or a remote service call
         return Flux.fromIterable(nameList)
@@ -30,13 +34,16 @@ public class FluxAndMonoGeneratorService {
     }
 
     public Flux<String> namesFlux_map() {
-        //namelist is a publisher. a publisher is a source of data like db or a remote service call
         return Flux.fromIterable(nameList)
                 .map(String::toUpperCase)
                 .log();
     }
 
-    public Mono<String> nameMono() {
-        return Mono.just("adam");
+    public Flux<String> namesFlux_immutability() {
+        var namesFlux = Flux.fromIterable(nameList);
+        namesFlux.map(String::toUpperCase);
+        return namesFlux;
     }
+
+
 }
