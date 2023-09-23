@@ -7,13 +7,14 @@ public class FluxAndMonoGeneratorServiceTest {
     FluxAndMonoGeneratorService fluxAndMonoGeneratorService = new FluxAndMonoGeneratorService();
 
     @Test
+    void nameMono() {
+        var nameMono = fluxAndMonoGeneratorService.nameMono();
+        StepVerifier.create(nameMono).expectNext("adam").verifyComplete();
+    }
+
+    @Test
     void namesFlux() {
-        //given
-
-        //when
         var namesFlux = fluxAndMonoGeneratorService.namesFlux();
-
-        //then
         StepVerifier.create(namesFlux)
                 //                .expectNext("alex", "ben", "chloe")
                 //                .expectNextCount(3)
@@ -23,8 +24,11 @@ public class FluxAndMonoGeneratorServiceTest {
     }
 
     @Test
-    void nameMono() {
-        var nameMono = fluxAndMonoGeneratorService.nameMono();
-        StepVerifier.create(nameMono).expectNext("adam").verifyComplete();
+    void namesFluxMap() {
+        StepVerifier.create(fluxAndMonoGeneratorService.namesFlux_map())
+                .expectNext("ALEX")
+                .expectNextCount(2)
+                .verifyComplete();
     }
+
 }

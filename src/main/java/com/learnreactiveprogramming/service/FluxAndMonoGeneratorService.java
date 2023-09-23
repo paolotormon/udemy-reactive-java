@@ -7,17 +7,33 @@ import java.util.List;
 
 public class FluxAndMonoGeneratorService {
 
+    private static final List<String> nameList = List.of("alex", "ben", "chloe");
+
     public static void main(String[] args) {
         FluxAndMonoGeneratorService fluxAndMonoGeneratorService = new FluxAndMonoGeneratorService();
-        fluxAndMonoGeneratorService.namesFlux()
+
+        fluxAndMonoGeneratorService
+                .namesFlux()
                 .subscribe(System.out::println);
-        fluxAndMonoGeneratorService.nameMono()
+        fluxAndMonoGeneratorService
+                .nameMono()
+                .subscribe(System.out::println);
+        fluxAndMonoGeneratorService
+                .namesFlux_map()
                 .subscribe(System.out::println);
     }
 
     public Flux<String> namesFlux() {
-        return Flux.fromIterable(List.of("alex", "ben", "chloe")).log(); //db or a
-        // remote service call
+        //namelist is a publisher. a publisher is a source of data like db or a remote service call
+        return Flux.fromIterable(nameList)
+                .log();
+    }
+
+    public Flux<String> namesFlux_map() {
+        //namelist is a publisher. a publisher is a source of data like db or a remote service call
+        return Flux.fromIterable(nameList)
+                .map(String::toUpperCase)
+                .log();
     }
 
     public Mono<String> nameMono() {
