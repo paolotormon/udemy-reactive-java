@@ -12,14 +12,17 @@ public class FluxAndMonoGeneratorService {
     public static void main(String[] args) {
         FluxAndMonoGeneratorService fluxAndMonoGeneratorService = new FluxAndMonoGeneratorService();
 
+        //        fluxAndMonoGeneratorService
+        //                .namesFlux()
+        //                .subscribe(System.out::println);
+        //        fluxAndMonoGeneratorService
+        //                .nameMono()
+        //                .subscribe(System.out::println);
+        //        fluxAndMonoGeneratorService
+        //                .namesFlux_map()
+        //                .subscribe(System.out::println);
         fluxAndMonoGeneratorService
-                .namesFlux()
-                .subscribe(System.out::println);
-        fluxAndMonoGeneratorService
-                .nameMono()
-                .subscribe(System.out::println);
-        fluxAndMonoGeneratorService
-                .namesFlux_map()
+                .namesFlux_flatMap(3)
                 .subscribe(System.out::println);
     }
 
@@ -45,5 +48,17 @@ public class FluxAndMonoGeneratorService {
         return namesFlux;
     }
 
+    Flux<String> namesFlux_flatMap(int stringLength) {
+        return Flux.fromIterable(nameList)
+                .map(String::toUpperCase)
+                .filter(s -> s.length() > stringLength)
+                .flatMap(this::splitString)
+                .log();
+    }
+
+    private Flux<String> splitString(String name) {
+        var charArray = name.split("");
+        return Flux.fromArray(charArray);
+    }
 
 }
