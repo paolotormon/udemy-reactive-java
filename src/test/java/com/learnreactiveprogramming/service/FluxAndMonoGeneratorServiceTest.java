@@ -24,7 +24,7 @@ public class FluxAndMonoGeneratorServiceTest {
     }
 
     @Test
-    void namesFluxMap() {
+    void namesFlux_map() {
         StepVerifier.create(fluxAndMonoGeneratorService.namesFlux_map())
                 .expectNext("ALEX")
                 .expectNextCount(2)
@@ -32,7 +32,7 @@ public class FluxAndMonoGeneratorServiceTest {
     }
 
     @Test
-    void namesFluxImmutability() {
+    void namesFlux_immutability() {
         StepVerifier.create(fluxAndMonoGeneratorService.namesFlux_immutability())
                 .expectNext("alex")
                 .expectNextCount(2)
@@ -40,10 +40,17 @@ public class FluxAndMonoGeneratorServiceTest {
     }
 
     @Test
-    void namesFluxFlatMap() {
+    void namesFlux_flatMap() {
         StepVerifier.create(fluxAndMonoGeneratorService.namesFlux_flatMap(3))
-                .expectNext("A","L","E","X","C","H","L","O")
+                .expectNext("A", "L", "E", "X", "C", "H", "L", "O")
                 .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void namesFlux_flatMap_async() {
+        StepVerifier.create(fluxAndMonoGeneratorService.namesFlux_flatMapAsync(3))
+                .expectNextCount(9)
                 .verifyComplete();
     }
 
