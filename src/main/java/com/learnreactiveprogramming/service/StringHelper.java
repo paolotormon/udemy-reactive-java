@@ -1,8 +1,10 @@
 package com.learnreactiveprogramming.service;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Random;
 
 public class StringHelper {
@@ -21,5 +23,11 @@ public class StringHelper {
         delayMilliseconds = delayMilliseconds > 0 ? delayMilliseconds : random;
         return Flux.fromArray(charArray)
                 .delayElements(Duration.ofMillis(delayMilliseconds));
+    }
+
+    public static Mono<List<String>> splitStringMono(String s) {
+        var charArray = s.split("");
+        var charList = List.of(charArray);
+        return Mono.just(charList);
     }
 }
