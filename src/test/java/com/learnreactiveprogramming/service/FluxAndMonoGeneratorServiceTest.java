@@ -76,4 +76,25 @@ public class FluxAndMonoGeneratorServiceTest {
                 .expectNext("A", "L", "E", "X")
                 .verifyComplete();
     }
+
+    @Test
+    void namesFlux_transform() {
+        StepVerifier.create(fluxAndMonoGeneratorService.namesFlux_transform_defaultIfEmpty(3))
+                .expectNextCount(9)
+                .verifyComplete();
+    }
+
+    @Test
+    void namesFlux_transform_empty() {
+        StepVerifier.create(fluxAndMonoGeneratorService.namesFlux_transform_defaultIfEmpty(6))
+                .expectNext("default")
+                .verifyComplete();
+    }
+
+    @Test
+    void namesFlux_transform_switchIfEmpty() {
+        StepVerifier.create(fluxAndMonoGeneratorService.namesFlux_transform_switchIfEmpty(6))
+                .expectNext("D", "E", "F", "A", "U", "L", "T")
+                .verifyComplete();
+    }
 }

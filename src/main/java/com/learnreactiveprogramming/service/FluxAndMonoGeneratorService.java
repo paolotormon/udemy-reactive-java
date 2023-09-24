@@ -4,6 +4,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.function.Function;
 
 public class FluxAndMonoGeneratorService {
 
@@ -96,6 +97,37 @@ public class FluxAndMonoGeneratorService {
                 .map(String::toUpperCase)
                 .filter(name -> name.length() > stringLength)
                 .concatMap(name -> StringHelper.splitStringWithDelay(name, 1000))
+                .log();
+    }
+
+    Flux<String> namesFlux_transform_defaultIfEmpty(int stringLength) {
+
+        Function<Flux<String>, Flux<String>> filterAndMap =
+                nameFlux -> nameFlux
+                        .filter(name -> name.length() > stringLength)
+                        .map(String::toUpperCase);
+
+        return Flux.fromIterable(nameList)
+                .transform(filterAndMap)
+                .flatMap(StringHelper::splitString)
+                .defaultIfEmpty("default")
+                .log();
+    }
+
+    Flux<String> namesFlux_transform_switchIfEmpty(int stringLength) {
+
+        Function<Flux<String>, Flux<String>> filterAndMap =
+                nameFlux -> nameFlux
+                        .filter(name -> name.length() > stringLength)
+                        .flatMap(StringHelper::splitString)
+                        .map(String::toUpperCase);
+
+        var defaultFlux = Flux.just("default")
+                .transform(filterAndMap);
+
+        return Flux.fromIterable(nameList)
+                .transform(filterAndMap)
+                .switchIfEmpty(defaultFlux)
                 .log();
     }
 
