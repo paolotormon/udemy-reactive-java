@@ -111,4 +111,26 @@ public class FluxAndMonoGeneratorServiceTest {
                 .expectNext("a", "b", "c", "d")
                 .verifyComplete();
     }
+
+    @Test
+    void explore_merge() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_merge())
+                .expectNext("a", "c", "b", "d")
+                .verifyComplete();
+    }
+
+    @Test
+    void explore_mergeWith() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_mergeWith())
+                .expectNext("a", "c", "b", "d")
+                .verifyComplete();
+    }
+
+    //write test for explore_mergeWith_mono
+    @Test
+    void explore_mergeWith_mono() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_mergeWith_mono())
+                .expectNext("a", "b")
+                .verifyComplete();
+    }
 }

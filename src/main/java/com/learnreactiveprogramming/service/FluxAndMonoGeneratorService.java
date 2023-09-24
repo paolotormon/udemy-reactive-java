@@ -3,12 +3,16 @@ package com.learnreactiveprogramming.service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
 
 public class FluxAndMonoGeneratorService {
 
     private static final List<String> nameList = List.of("alex", "ben", "chloe");
+
+    private static final Flux<String> abFlux = Flux.just("a", "b");
+    private static final Flux<String> cdFlux = Flux.just("c", "d");
 
     public static void main(String[] args) {
         FluxAndMonoGeneratorService fluxAndMonoGeneratorService = new FluxAndMonoGeneratorService();
@@ -132,15 +136,33 @@ public class FluxAndMonoGeneratorService {
     }
 
     public Flux<String> explore_concat() {
-        var abFlux = Flux.just("a", "b");
-        var cdFlux = Flux.just("c", "d");
-        return Flux.concat(abFlux, cdFlux);
+        return Flux.concat(abFlux, cdFlux)
+                .log();
     }
 
     public Flux<String> explore_concatWith() {
-        var abFlux = Flux.just("a", "b");
-        var cdFlux = Flux.just("c", "d");
-        return abFlux.concatWith(cdFlux);
+        return abFlux.concatWith(cdFlux).log();
+    }
+
+    Flux<String> explore_merge() {
+        var abFluxWithDelay = abFlux.delayElements(Duration.ofMillis(100));
+        var cdFluxWithDelay = cdFlux.delayElements(Duration.ofMillis(100));
+        return Flux.merge(abFluxWithDelay, cdFluxWithDelay)
+                .log();
+    }
+
+    Flux<String> explore_mergeWith() {
+        var abFluxWithDelay = abFlux.delayElements(Duration.ofMillis(100));
+        var cdFluxWithDelay = cdFlux.delayElements(Duration.ofMillis(110));
+        return abFluxWithDelay.mergeWith(cdFluxWithDelay)
+                .log();
+    }
+
+    Flux<String> explore_mergeWith_mono() {
+        var aMono = Mono.just("a");
+        var bMono = Mono.just("b");
+        return aMono.mergeWith(bMono)
+                .log();
     }
 
 }
