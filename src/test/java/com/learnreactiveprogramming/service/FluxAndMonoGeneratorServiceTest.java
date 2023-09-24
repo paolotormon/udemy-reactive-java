@@ -140,4 +140,25 @@ public class FluxAndMonoGeneratorServiceTest {
                 .expectNext("a", "b", "c", "d")
                 .verifyComplete();
     }
+
+    @Test
+    void explore_zip() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_zip())
+                .expectNext("ace", "bdf")
+                .verifyComplete();
+    }
+
+    @Test
+    void explore_zipWith() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_zipWith())
+                .expectNext("ac", "bd")
+                .verifyComplete();
+    }
+
+    @Test
+    void explore_zip_mono() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_zip_mono())
+                .expectNext("ab")
+                .verifyComplete();
+    }
 }

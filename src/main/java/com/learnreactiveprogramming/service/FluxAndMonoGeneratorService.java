@@ -13,6 +13,7 @@ public class FluxAndMonoGeneratorService {
 
     private static final Flux<String> abFlux = Flux.just("a", "b");
     private static final Flux<String> cdFlux = Flux.just("c", "d");
+    private static final Flux<String> efFlux = Flux.just("e", "f");
 
     public static void main(String[] args) {
         FluxAndMonoGeneratorService fluxAndMonoGeneratorService = new FluxAndMonoGeneratorService();
@@ -174,6 +175,26 @@ public class FluxAndMonoGeneratorService {
         var cdFluxWithDelay = cdFlux.delayElements(Duration.ofMillis(110));
         return Flux.mergeSequential(abFluxWithDelay, cdFluxWithDelay)
                 .log();
+    }
+
+    Flux<String> explore_zip() {
+        return Flux.zip(abFlux, cdFlux, efFlux)
+                .map(t -> t.getT1() + t.getT2() + t.getT3())
+                .log();
+    }
+
+    Flux<String> explore_zipWith() {
+        return abFlux.zipWith(cdFlux)
+                .map(t -> t.getT1() + t.getT2())
+                .log();
+    }
+
+    Mono<String> explore_zip_mono() {
+        var aMono = Mono.just("a");
+        var bMono = Mono.just("b");
+        return Mono.zip(aMono, bMono, (string1, string2) -> string1 + string2)
+                .log();
+
     }
 
 }
