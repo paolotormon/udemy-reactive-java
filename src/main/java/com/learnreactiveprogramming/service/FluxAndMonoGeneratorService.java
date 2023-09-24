@@ -165,4 +165,15 @@ public class FluxAndMonoGeneratorService {
                 .log();
     }
 
+    Flux<String> explore_mergeSequential() {
+        //Concat vs mergeSequential
+        //mergeSequential is similar to concat but it runs the publishers in parallel
+        //the results are just cached and then merged in the order they were subscribed to
+        //https://stackoverflow.com/questions/67857350/project-reactor-what-are-differences-between-flux-concat-flux-mergesequential
+        var abFluxWithDelay = abFlux.delayElements(Duration.ofMillis(100));
+        var cdFluxWithDelay = cdFlux.delayElements(Duration.ofMillis(110));
+        return Flux.mergeSequential(abFluxWithDelay, cdFluxWithDelay)
+                .log();
+    }
+
 }
