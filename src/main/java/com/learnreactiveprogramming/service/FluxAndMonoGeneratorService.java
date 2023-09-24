@@ -131,4 +131,16 @@ public class FluxAndMonoGeneratorService {
                 .log();
     }
 
+    public Flux<String> explore_concat() {
+        var abFlux = Flux.just("a", "b");
+        var cdFlux = Flux.just("c", "d");
+        return Flux.concat(abFlux, cdFlux);
+    }
+
+    public Flux<String> explore_concatWith() {
+        var abFlux = Flux.just("a", "b");
+        var cdFlux = Flux.just("c", "d");
+        return abFlux.concatWith(cdFlux);
+    }
+
 }

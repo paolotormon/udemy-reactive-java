@@ -97,4 +97,18 @@ public class FluxAndMonoGeneratorServiceTest {
                 .expectNext("D", "E", "F", "A", "U", "L", "T")
                 .verifyComplete();
     }
+
+    @Test
+    void explore_concat() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_concat())
+                .expectNext("a", "b", "c", "d")
+                .verifyComplete();
+    }
+
+    @Test
+    void explore_concatWith() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_concatWith())
+                .expectNext("a", "b", "c", "d")
+                .verifyComplete();
+    }
 }
