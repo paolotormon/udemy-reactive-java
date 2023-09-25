@@ -198,4 +198,11 @@ public class FluxAndMonoGeneratorServiceTest {
                 .expectError()
                 .verify();
     }
+
+    @Test
+    void explore_onErrorContinue() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_onErrorContinue())
+                .expectNext("a", "c", "d")
+                .verifyComplete();
+    }
 }

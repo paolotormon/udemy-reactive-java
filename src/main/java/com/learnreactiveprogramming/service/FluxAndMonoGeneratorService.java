@@ -1,5 +1,6 @@
 package com.learnreactiveprogramming.service;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -7,6 +8,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
 
+@Slf4j
 public class FluxAndMonoGeneratorService {
 
     private static final List<String> nameList = List.of("alex", "ben", "chloe");
@@ -232,6 +234,22 @@ public class FluxAndMonoGeneratorService {
                         return Flux.error(ex);
                     }
                 })
+                .log();
+    }
+
+    Flux<String> explore_onErrorContinue() {
+        return Flux.just("a", "b", "c")
+                .map(letter -> {
+                    if (letter.equals("b")) {
+                        throw new RuntimeException();
+                    }
+                    return letter;
+                })
+                .onErrorContinue((throwable, name) -> {
+                    log.error("Exception", throwable);
+                    log.info("name is {}", name);
+                })
+                .concatWith(Flux.just("d"))
                 .log();
     }
 }
