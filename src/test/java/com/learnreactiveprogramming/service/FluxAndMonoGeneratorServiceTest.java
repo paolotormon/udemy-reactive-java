@@ -161,4 +161,20 @@ public class FluxAndMonoGeneratorServiceTest {
                 .expectNext("ab")
                 .verifyComplete();
     }
+
+    @Test
+    void exception_flux() {
+        StepVerifier.create(fluxAndMonoGeneratorService.exception_flux())
+                .expectNext("a", "b", "c")
+                .expectError(RuntimeException.class)
+                .verify();
+        StepVerifier.create(fluxAndMonoGeneratorService.exception_flux())
+                .expectNext("a", "b", "c")
+                .expectError()
+                .verify();
+        StepVerifier.create(fluxAndMonoGeneratorService.exception_flux())
+                .expectNext("a", "b", "c")
+                .expectErrorMessage("Exception Occured")
+                .verify();
+    }
 }
