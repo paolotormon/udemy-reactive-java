@@ -214,4 +214,12 @@ public class FluxAndMonoGeneratorServiceTest {
                 .expectError(ReactorException.class)
                 .verify();
     }
+
+    @Test
+    void explore_doOnError() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_doOnError())
+                .expectNext("a", "b", "c")
+                .expectError()
+                .verify();
+    }
 }

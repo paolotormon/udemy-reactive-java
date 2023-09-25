@@ -269,4 +269,13 @@ public class FluxAndMonoGeneratorService {
                 .concatWith(Flux.just("d"))
                 .log();
     }
+
+    Flux<String> explore_doOnError() {
+        return Flux.just("a", "b", "c")
+                .doOnError(ex -> {
+                    log.error("Exception", ex);
+                })
+                .concatWith(Flux.error(new IllegalStateException()))
+                .log();
+    }
 }
