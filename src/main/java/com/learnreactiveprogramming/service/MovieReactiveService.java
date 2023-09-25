@@ -27,7 +27,7 @@ public class MovieReactiveService {
                     .collectList();
             //map only runs once. Just used for creating Movie object
             var movieMono = reviewsMono.map(reviewsList -> new Movie(movieInfo, reviewsList));
-            return movieMono;
+            return movieMono.log();
         });
 
         return movieFlux;
