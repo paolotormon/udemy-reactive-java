@@ -48,6 +48,15 @@ public class FluxAndMonoGeneratorService {
     public Flux<String> namesFlux_map() {
         return Flux.fromIterable(nameList)
                 .map(String::toUpperCase)
+                .doOnNext(name -> {
+                    System.out.println("name is " + name);
+                })
+                .doOnSubscribe(subscription -> {
+                    //see this prints before doOnNext because subscribe happens first
+                    System.out.println("subscription is " + subscription);
+                })
+                .doOnComplete(() -> System.out.println("Inside onComplete callback"))
+                .doFinally(signalType -> System.out.println("Inside doFinally. signalType: " + signalType))
                 .log();
     }
 

@@ -44,7 +44,7 @@ public class MovieReactiveService {
                 reviewsListMono,
                 (movieInfo, reviewsList) -> new Movie(movieInfo, reviewsList)).log();
         return movie;
-        // Failed tests:
+        // Failed:
         //        Mono<Movie> x = null;
         //        movieInfoMono.subscribe(
         //                movieInfo -> {
