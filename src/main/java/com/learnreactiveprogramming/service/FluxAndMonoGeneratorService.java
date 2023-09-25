@@ -212,4 +212,11 @@ public class FluxAndMonoGeneratorService {
                 .concatWith(Flux.just("d"))
                 .log();
     }
+
+    Flux<String> explore_onErrorReturn() {
+        return Flux.just("a", "b", "c")
+                .concatWith(Flux.error(new IllegalStateException("Exception Occured")))
+                .onErrorReturn("d")
+                .log();
+    }
 }

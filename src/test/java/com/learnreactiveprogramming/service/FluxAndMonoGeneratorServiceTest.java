@@ -177,4 +177,11 @@ public class FluxAndMonoGeneratorServiceTest {
                 .expectErrorMessage("Exception Occured")
                 .verify();
     }
+
+    @Test
+    void explore_onErrorReturn() {
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_onErrorReturn())
+                .expectNext("a", "b", "c", "d")
+                .verifyComplete();
+    }
 }
