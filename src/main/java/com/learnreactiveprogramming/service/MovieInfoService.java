@@ -35,7 +35,7 @@ public class MovieInfoService {
                 new MovieInfo(102L, "Dark Knight Rises", 2008, List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2012-07-20")));
     }
 
-    public MovieInfo retrieveMovieUsingId(long movieId) {
+    public MovieInfo retrieveMovieInfoUsingId(long movieId) {
         delay(1000);
         return new MovieInfo(movieId, "Batman Begins", 2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
     }

@@ -21,15 +21,39 @@ public class MovieReactiveService {
     public Flux<Movie> getAllMovies() {
         Flux<MovieInfo> moviesInfoFlux = movieInfoService.retrieveMoviesFlux();
 
-        var movieFlux = moviesInfoFlux.flatMap(movieInfo -> {
-            Mono<List<Review>> reviewsMono = reviewService
+        Flux<Movie> movieFlux = moviesInfoFlux.flatMap(movieInfo -> {
+            Mono<List<Review>> reviewsListMono = reviewService
                     .retrieveReviewsFlux(movieInfo.getMovieInfoId())
                     .collectList();
-            //map only runs once. Just used for creating Movie object
-            var movieMono = reviewsMono.map(reviewsList -> new Movie(movieInfo, reviewsList));
-            return movieMono.log();
-        });
 
+            // map only runs once in this loop. Just used for creating Movie object
+            Mono<Movie> movieMono = reviewsListMono.map(reviewsList -> new Movie(movieInfo, reviewsList)).log();
+            return movieMono; // Inside flatMap, so Mono<Movie> is converted to Movie
+        });
         return movieFlux;
+    }
+
+    public Mono<Movie> getMovieById(long movieId) {
+        Mono<MovieInfo> movieInfoMono = movieInfoService.retrieveMovieInfoMonoUsingId(movieId);
+        Mono<List<Review>> reviewsListMono = reviewService
+                .retrieveReviewsFlux(movieId)
+                .collectList();
+
+        var movie = Mono.zip(
+                movieInfoMono,
+                reviewsListMono,
+                (movieInfo, reviewsList) -> new Movie(movieInfo, reviewsList)).log();
+        return movie;
+        // Failed tests:
+        //        Mono<Movie> x = null;
+        //        movieInfoMono.subscribe(
+        //                movieInfo -> {
+        //                    reviewsListMono.subscribe(reviewList -> {
+        //                        x = new Movie(movieInfo, reviewList);
+        //                    });
+        //                }
+        //        );
+        //        return Mono.just(new Movie((MovieInfo) movieInfoMono.subscribe(),
+        //                (List<Review>) reviewsListMono.subscribe()));
     }
 }
