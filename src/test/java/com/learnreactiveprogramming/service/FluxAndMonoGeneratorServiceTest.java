@@ -184,4 +184,18 @@ public class FluxAndMonoGeneratorServiceTest {
                 .expectNext("a", "b", "c", "d")
                 .verifyComplete();
     }
+
+    @Test
+    void explore_onErrorResume() {
+        Exception e = new IllegalStateException("Not a valid state");
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_onErrorResume(e))
+                .expectNext("a", "b", "c", "d", "e")
+                .verifyComplete();
+
+        Exception e2 = new RuntimeException("Not a valid state");
+        StepVerifier.create(fluxAndMonoGeneratorService.explore_onErrorResume(e2))
+                .expectNext("a", "b", "c")
+                .expectError()
+                .verify();
+    }
 }
