@@ -4,10 +4,16 @@ import com.learnreactiveprogramming.domain.Movie;
 import com.learnreactiveprogramming.domain.MovieInfo;
 import com.learnreactiveprogramming.domain.Review;
 import com.learnreactiveprogramming.exception.MovieException;
+import com.learnreactiveprogramming.exception.NetworkException;
+import com.learnreactiveprogramming.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+import reactor.util.retry.RetryBackoffSpec;
 
+import java.time.Duration;
 import java.util.List;
 
 @Slf4j
@@ -60,6 +66,40 @@ public class MovieReactiveService {
                 .retry(3)
                 .log();
         return movieFlux;
+    }
+
+    public Flux<Movie> getAllMovies_retryWhen() {
+
+        Flux<MovieInfo> moviesInfoFlux = movieInfoService.retrieveMoviesFlux();
+
+        Flux<Movie> movieFlux = moviesInfoFlux.flatMap(movieInfo -> {
+                    Mono<List<Review>> reviewsListMono = reviewService
+                            .retrieveReviewsFlux(movieInfo.getMovieInfoId())
+                            .collectList();
+
+                    // map only runs once in this loop. Just used for creating Movie object
+                    Mono<Movie> movieMono = reviewsListMono.map(reviewsList -> new Movie(movieInfo, reviewsList));
+                    return movieMono; // Inside flatMap, so Mono<Movie> is converted to Movie
+                })
+                .onErrorMap(ex -> {
+                    log.error("Exception is: ", ex);
+                    if (ex instanceof NetworkException) {
+                        throw new MovieException(ex.getMessage());
+                    } else {
+                        throw new ServiceException(ex.getMessage());
+                    }
+                })
+                .retryWhen(getRetryBackoffSpec())
+                .log();
+        return movieFlux;
+    }
+
+    private RetryBackoffSpec getRetryBackoffSpec() {
+        RetryBackoffSpec retryBackOffSpec = Retry.backoff(3, Duration.ofMillis(500))
+                .filter(ex -> ex instanceof MovieException)
+                .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) ->
+                        Exceptions.propagate(retrySignal.failure()));
+        return retryBackOffSpec;
     }
 
     public Mono<Movie> getMovieById(long movieId) {

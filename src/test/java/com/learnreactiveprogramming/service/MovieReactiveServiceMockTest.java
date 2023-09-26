@@ -1,6 +1,8 @@
 package com.learnreactiveprogramming.service;
 
 import com.learnreactiveprogramming.exception.MovieException;
+import com.learnreactiveprogramming.exception.NetworkException;
+import com.learnreactiveprogramming.exception.ServiceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -69,5 +71,41 @@ class MovieReactiveServiceMockTest {
                 .verify();
         verify(reviewService, times(4)).retrieveReviewsFlux(anyLong());
         verify(reviewService, times(4)).retrieveReviewsFlux(isA(Long.class));
+    }
+
+    @Test
+    void getAllMovies_retryWhen() {
+        var errorMessage = "Exception occured";
+        Mockito.when(movieInfoService.retrieveMoviesFlux())
+                .thenCallRealMethod();
+
+        Mockito.when(reviewService.retrieveReviewsFlux(anyLong()))
+                .thenThrow(new NetworkException(errorMessage));
+
+        var moviesFlux = movieReactiveService.getAllMovies_retryWhen();
+
+        StepVerifier.create(moviesFlux)
+                .expectError(MovieException.class)
+                .verify();
+        verify(reviewService, times(4)).retrieveReviewsFlux(anyLong());
+        verify(reviewService, times(4)).retrieveReviewsFlux(isA(Long.class));
+    }
+
+    @Test
+    void getAllMovies_retryWhen_serviceException() {
+        var errorMessage = "Exception occured";
+        Mockito.when(movieInfoService.retrieveMoviesFlux())
+                .thenCallRealMethod();
+
+        Mockito.when(reviewService.retrieveReviewsFlux(anyLong()))
+                .thenThrow(new ServiceException(errorMessage));
+
+        var moviesFlux = movieReactiveService.getAllMovies_retryWhen();
+
+        StepVerifier.create(moviesFlux)
+                .expectError(ServiceException.class)
+                .verify();
+
+        verify(reviewService, times(1)).retrieveReviewsFlux(anyLong());
     }
 }
