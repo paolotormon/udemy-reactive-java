@@ -10,6 +10,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class MovieReactiveServiceMockTest {
@@ -50,4 +53,21 @@ class MovieReactiveServiceMockTest {
                 .verify();
     }
 
+    @Test
+    void getAllMovies_retry() {
+        var errorMessage = "Exception occured";
+        Mockito.when(movieInfoService.retrieveMoviesFlux())
+                .thenCallRealMethod();
+
+        Mockito.when(reviewService.retrieveReviewsFlux(anyLong()))
+                .thenThrow(new MovieException(errorMessage));
+
+        var moviesFlux = movieReactiveService.getAllMovies_retry();
+
+        StepVerifier.create(moviesFlux)
+                .expectError(MovieException.class)
+                .verify();
+        verify(reviewService, times(4)).retrieveReviewsFlux(anyLong());
+        verify(reviewService, times(4)).retrieveReviewsFlux(isA(Long.class));
+    }
 }

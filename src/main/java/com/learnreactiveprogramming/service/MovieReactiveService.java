@@ -41,6 +41,27 @@ public class MovieReactiveService {
         return movieFlux;
     }
 
+    public Flux<Movie> getAllMovies_retry() {
+        Flux<MovieInfo> moviesInfoFlux = movieInfoService.retrieveMoviesFlux();
+
+        Flux<Movie> movieFlux = moviesInfoFlux.flatMap(movieInfo -> {
+                    Mono<List<Review>> reviewsListMono = reviewService
+                            .retrieveReviewsFlux(movieInfo.getMovieInfoId())
+                            .collectList();
+
+                    // map only runs once in this loop. Just used for creating Movie object
+                    Mono<Movie> movieMono = reviewsListMono.map(reviewsList -> new Movie(movieInfo, reviewsList));
+                    return movieMono; // Inside flatMap, so Mono<Movie> is converted to Movie
+                })
+                .onErrorMap(ex -> {
+                    log.error("Exception is: ", ex);
+                    throw new MovieException(ex.getMessage());
+                })
+                .retry(3)
+                .log();
+        return movieFlux;
+    }
+
     public Mono<Movie> getMovieById(long movieId) {
         Mono<MovieInfo> movieInfoMono = movieInfoService.retrieveMovieInfoMonoUsingId(movieId);
         Mono<List<Review>> reviewsListMono = reviewService
