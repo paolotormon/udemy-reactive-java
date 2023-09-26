@@ -119,6 +119,7 @@ public class FluxAndMonoGeneratorService {
 
     Flux<String> namesFlux_transform_defaultIfEmpty(int stringLength) {
 
+        //Flux<String> input, Flux<String> output
         Function<Flux<String>, Flux<String>> filterAndMap =
                 nameFlux -> nameFlux
                         .filter(name -> name.length() > stringLength)

@@ -14,7 +14,10 @@ public class FluxAndMonoSchedulersService {
     static List<String> namesList = List.of("alex", "ben", "chloe");
     static List<String> namesList1 = List.of("adam", "jill", "jack");
 
+    //publishOn for downstream only
     Flux<String> explore_publishOn() {
+        //parallel for cpu-bound
+        //boundedElastic for io-bound
         var namesFlux = Flux.fromIterable(namesList)
                 .publishOn(Schedulers.parallel())
                 .map(this::upperCase)
@@ -33,6 +36,33 @@ public class FluxAndMonoSchedulersService {
                 .log();
 
         return namesFlux.mergeWith(namesFlux1);
+    }
+
+    // subscribeOn if u have no control of upstream
+    Flux<String> explore_subscribeOn() {
+        var namesFlux = getFlux(namesList)
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(s -> {
+                    log.info("name is: " + s);
+                    return s;
+                })
+                .log();
+
+        var namesFlux1 = getFlux(namesList1)
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(s -> {
+                    log.info("name is: " + s);
+                    return s;
+                })
+                .log();
+
+        return namesFlux.mergeWith(namesFlux1);
+    }
+
+    //example this is a library u have no control over, which has a blocking call (uppercase)
+    private Flux<String> getFlux(List<String> namesList) {
+        return Flux.fromIterable((namesList))
+                .map(this::upperCase);
     }
 
     private String upperCase(String name) {
