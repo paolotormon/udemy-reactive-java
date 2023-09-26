@@ -6,11 +6,13 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class MovieReactiveServiceTest {
     private MovieInfoService movieInfoService = new MovieInfoService();
     private ReviewService reviewService = new ReviewService();
-    private MovieReactiveService movieReactiveService = new MovieReactiveService(movieInfoService, reviewService);
+    private RevenueService revenueService = new RevenueService();
+    private MovieReactiveService movieReactiveService = new MovieReactiveService(movieInfoService, reviewService, revenueService);
 
     @Test
     void getAllMovies() {
@@ -43,6 +45,18 @@ class MovieReactiveServiceTest {
                     assertEquals(2, movie.getReviewList().size());
                 })
                 .verifyComplete();
+    }
 
+    @Test
+    void getMovieByIdWithRevenue() {
+        long movieId = 100L;
+        Mono<Movie> movieMono = movieReactiveService.getMovieByIdWithRevenue(movieId);
+        StepVerifier.create(movieMono)
+                .assertNext(movie -> {
+                    assertEquals("Batman Begins", movie.getMovieInfo().getName());
+                    assertEquals(2, movie.getReviewList().size());
+                    assertNotNull(movie.getRevenue());
+                })
+                .verifyComplete();
     }
 }

@@ -2,14 +2,17 @@ package com.learnreactiveprogramming.service;
 
 import com.learnreactiveprogramming.domain.Movie;
 import com.learnreactiveprogramming.domain.MovieInfo;
+import com.learnreactiveprogramming.domain.Revenue;
 import com.learnreactiveprogramming.domain.Review;
 import com.learnreactiveprogramming.exception.MovieException;
 import com.learnreactiveprogramming.exception.NetworkException;
 import com.learnreactiveprogramming.exception.ServiceException;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.retry.Retry;
 import reactor.util.retry.RetryBackoffSpec;
 
@@ -17,10 +20,13 @@ import java.time.Duration;
 import java.util.List;
 
 @Slf4j
+@AllArgsConstructor
 public class MovieReactiveService {
 
     private MovieInfoService movieInfoService;
     private ReviewService reviewService;
+
+    private RevenueService revenueService;
 
     public MovieReactiveService(MovieInfoService movieInfoService, ReviewService reviewService) {
         this.movieInfoService = movieInfoService;
@@ -176,5 +182,27 @@ public class MovieReactiveService {
         //        );
         //        return Mono.just(new Movie((MovieInfo) movieInfoMono.subscribe(),
         //                (List<Review>) reviewsListMono.subscribe()));
+    }
+
+    public Mono<Movie> getMovieByIdWithRevenue(long movieId) {
+        Mono<MovieInfo> movieInfoMono = movieInfoService.retrieveMovieInfoMonoUsingId(movieId);
+        Mono<List<Review>> reviewsListMono = reviewService
+                .retrieveReviewsFlux(movieId)
+                .collectList();
+        // Not calling the below because it is called immediately...blocking the current thread
+        // until the result is available.
+        // Mono<Revenue> revenue = Mono.just(revenueService.getRevenue(movieId));
+        Mono<Revenue> revenueMono = Mono.fromCallable(() -> revenueService.getRevenue(movieId))
+                .subscribeOn(Schedulers.boundedElastic());
+
+        return movieInfoMono
+                .zipWith(reviewsListMono, (movieInfo, reviewsList) -> new Movie(movieInfo, reviewsList))
+                .zipWith(revenueMono, (movie, revenue) -> {
+                    movie.setRevenue(revenue);
+                    return movie;
+                })
+                .log();
+
+        //        return movie;
     }
 }
