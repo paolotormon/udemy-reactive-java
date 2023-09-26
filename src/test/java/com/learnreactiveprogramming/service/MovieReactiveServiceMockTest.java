@@ -108,4 +108,39 @@ class MovieReactiveServiceMockTest {
 
         verify(reviewService, times(1)).retrieveReviewsFlux(anyLong());
     }
+
+    @Test
+    void getAllMovies_repeat() {
+        Mockito.when(movieInfoService.retrieveMoviesFlux())
+                .thenCallRealMethod();
+
+        Mockito.when(reviewService.retrieveReviewsFlux(anyLong()))
+                .thenCallRealMethod();
+
+        var moviesFlux = movieReactiveService.getAllMovies_repeat();
+
+        StepVerifier.create(moviesFlux)
+                .expectNextCount(6)
+                .thenCancel()
+                .verify();
+        verify(reviewService, times(6)).retrieveReviewsFlux(anyLong());
+    }
+
+    @Test
+    void getAllMovies_repeat_n() {
+        Mockito.when(movieInfoService.retrieveMoviesFlux())
+                .thenCallRealMethod();
+
+        Mockito.when(reviewService.retrieveReviewsFlux(anyLong()))
+                .thenCallRealMethod();
+
+        var numOfTimes = 2L;
+
+        var moviesFlux = movieReactiveService.getAllMovies_repeat_n(numOfTimes);
+
+        StepVerifier.create(moviesFlux)
+                .expectNextCount(9)
+                .verifyComplete();
+        verify(reviewService, times(9)).retrieveReviewsFlux(anyLong());
+    }
 }

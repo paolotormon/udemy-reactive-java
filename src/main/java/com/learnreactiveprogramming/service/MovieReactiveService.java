@@ -94,6 +94,58 @@ public class MovieReactiveService {
         return movieFlux;
     }
 
+    public Flux<Movie> getAllMovies_repeat() {
+
+        Flux<MovieInfo> moviesInfoFlux = movieInfoService.retrieveMoviesFlux();
+
+        Flux<Movie> movieFlux = moviesInfoFlux.flatMap(movieInfo -> {
+                    Mono<List<Review>> reviewsListMono = reviewService
+                            .retrieveReviewsFlux(movieInfo.getMovieInfoId())
+                            .collectList();
+
+                    // map only runs once in this loop. Just used for creating Movie object
+                    Mono<Movie> movieMono = reviewsListMono.map(reviewsList -> new Movie(movieInfo, reviewsList));
+                    return movieMono; // Inside flatMap, so Mono<Movie> is converted to Movie
+                })
+                .onErrorMap(ex -> {
+                    log.error("Exception is: ", ex);
+                    if (ex instanceof NetworkException) {
+                        throw new MovieException(ex.getMessage());
+                    } else {
+                        throw new ServiceException(ex.getMessage());
+                    }
+                })
+                .repeat()
+                .log();
+        return movieFlux;
+    }
+
+    public Flux<Movie> getAllMovies_repeat_n(long n) {
+
+        Flux<MovieInfo> moviesInfoFlux = movieInfoService.retrieveMoviesFlux();
+
+        Flux<Movie> movieFlux = moviesInfoFlux.flatMap(movieInfo -> {
+                    Mono<List<Review>> reviewsListMono = reviewService
+                            .retrieveReviewsFlux(movieInfo.getMovieInfoId())
+                            .collectList();
+
+                    // map only runs once in this loop. Just used for creating Movie object
+                    Mono<Movie> movieMono = reviewsListMono.map(reviewsList -> new Movie(movieInfo, reviewsList));
+                    return movieMono; // Inside flatMap, so Mono<Movie> is converted to Movie
+                })
+                .onErrorMap(ex -> {
+                    log.error("Exception is: ", ex);
+                    if (ex instanceof NetworkException) {
+                        throw new MovieException(ex.getMessage());
+                    } else {
+                        throw new ServiceException(ex.getMessage());
+                    }
+                })
+                .repeat(n)
+                .log();
+        return movieFlux;
+    }
+
     private RetryBackoffSpec getRetryBackoffSpec() {
         RetryBackoffSpec retryBackOffSpec = Retry.backoff(3, Duration.ofMillis(500))
                 .filter(ex -> ex instanceof MovieException)
