@@ -6,6 +6,11 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @Slf4j
 public class BackpressureTest {
 
@@ -43,5 +48,47 @@ public class BackpressureTest {
                 log.info("inside onCancel");
             }
         });
+    }
+
+    @Test
+    void testBackPressure_1() throws InterruptedException {
+        var numberRange = Flux.range(1, 100).log();
+
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        numberRange.subscribe(new BaseSubscriber<Integer>() {
+            @Override
+            protected void hookOnSubscribe(Subscription subscription) {
+                request(2);
+            }
+
+            @Override
+            protected void hookOnNext(Integer value) {
+                log.info("value - {}", value);
+                if (value % 2 == 0) {
+                    request(2);
+                } else if (value >= 50) {
+                    cancel();
+                }
+            }
+
+            @Override
+            protected void hookOnComplete() {
+                super.hookOnComplete();
+            }
+
+            @Override
+            protected void hookOnError(Throwable throwable) {
+                super.hookOnError(throwable);
+            }
+
+            @Override
+            protected void hookOnCancel() {
+                log.info("inside onCancel");
+                countDownLatch.countDown();
+            }
+        });
+
+        assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
     }
 }
