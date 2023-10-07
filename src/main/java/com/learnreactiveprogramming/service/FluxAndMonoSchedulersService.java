@@ -2,6 +2,7 @@ package com.learnreactiveprogramming.service;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
@@ -48,7 +49,7 @@ public class FluxAndMonoSchedulersService {
         // 3 names with 8 threads = 1 second
         // 8 names with 8 threads = 1 second
         // 9 names with 8 threads = 2 seconds
-        
+
         return Flux.fromIterable(namesList)
                 .parallel()
                 .runOn(Schedulers.parallel())
@@ -60,6 +61,35 @@ public class FluxAndMonoSchedulersService {
                 .log();
     }
 
+    public Flux<String> explore_parallel_using_flatMap() {
+        //Run test, see that the order is not guaranteed
+        return Flux.fromIterable(namesList)
+                .flatMap(name ->
+                        Mono.just(name)
+                                .map(this::upperCase)  //has a blocking call
+                                .subscribeOn(Schedulers.parallel()))
+                .log();
+    }
+
+    Flux<String> explore_parallel_using_flatMap_mergeWith() {
+        //Schedulers.parallel for cpu-bound
+        //Schedulers.boundedElastic for io-bound
+        var namesFlux = Flux.fromIterable(namesList)
+                .flatMap(name ->
+                        Mono.just(name)
+                                .map(this::upperCase)  //has a blocking call
+                                .subscribeOn(Schedulers.parallel()))
+                .log();
+        var namesFlux1 = Flux.fromIterable(namesList1)
+                .publishOn(Schedulers.boundedElastic())
+                .flatMap(name ->
+                        Mono.just(name)
+                                .map(this::upperCase)  //has a blocking call
+                                .subscribeOn(Schedulers.parallel()))
+                .log();
+
+        return namesFlux.mergeWith(namesFlux1);
+    }
 
     // subscribeOn if u have no control of upstream
     Flux<String> explore_subscribeOn() {
@@ -81,6 +111,7 @@ public class FluxAndMonoSchedulersService {
 
         return namesFlux.mergeWith(namesFlux1);
     }
+
 
     //example this is a library u have no control over, which has a blocking call (uppercase)
     private Flux<String> getFlux(List<String> namesList) {

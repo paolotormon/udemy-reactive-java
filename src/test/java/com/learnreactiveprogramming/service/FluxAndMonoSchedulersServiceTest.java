@@ -30,4 +30,20 @@ class FluxAndMonoSchedulersServiceTest {
                 .expectNextCount(3)
                 .verifyComplete();
     }
+
+    @Test
+    void explore_parallel_using_flatMap() {
+        var flux = fluxAndMonoSchedulersService.explore_parallel_using_flatMap();
+        StepVerifier.create(flux)
+                .expectNextCount(3)
+                .verifyComplete();
+    }
+
+    @Test
+    void explore_parallel_using_flatMap_mergeWith() {
+        var flux = fluxAndMonoSchedulersService.explore_parallel_using_flatMap_mergeWith();
+        StepVerifier.create(flux)
+                .expectNextCount(6)
+                .verifyComplete();
+    }
 }
