@@ -72,8 +72,6 @@ public class FluxAndMonoSchedulersService {
     }
 
     Flux<String> explore_parallel_using_flatMap_mergeWith() {
-        //Schedulers.parallel for cpu-bound
-        //Schedulers.boundedElastic for io-bound
         var namesFlux = Flux.fromIterable(namesList)
                 .flatMap(name ->
                         Mono.just(name)
@@ -89,6 +87,15 @@ public class FluxAndMonoSchedulersService {
                 .log();
 
         return namesFlux.mergeWith(namesFlux1);
+    }
+
+    public Flux<String> explore_parallel_using_flatMapSequential() {
+        return Flux.fromIterable(namesList)
+                .flatMapSequential(name ->
+                        Mono.just(name)
+                                .map(this::upperCase)  //has a blocking call
+                                .subscribeOn(Schedulers.parallel()))
+                .log();
     }
 
     // subscribeOn if u have no control of upstream

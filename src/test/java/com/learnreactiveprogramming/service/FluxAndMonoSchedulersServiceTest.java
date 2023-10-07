@@ -46,4 +46,12 @@ class FluxAndMonoSchedulersServiceTest {
                 .expectNextCount(6)
                 .verifyComplete();
     }
+
+    @Test
+    void explore_parallel_using_flatMapSequential() {
+        var flux = fluxAndMonoSchedulersService.explore_parallel_using_flatMapSequential();
+        StepVerifier.create(flux)
+                .expectNextCount(3)
+                .verifyComplete();
+    }
 }
